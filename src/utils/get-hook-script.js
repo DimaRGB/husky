@@ -79,10 +79,16 @@ module.exports = function getHookScript(hookName, relativePath, npmScriptName) {
         [ -f package.json ] && cat package.json | grep -q "\\"$1\\"[[:space:]]*:"
       }
 
-      cd "${normalizedPath}"
+      # Check if changed files only from normalizedPath
+      if [[ $(git diff --cached --name-only) == *"${normalizedPath}"* ]]; then
+        cd "${normalizedPath}"
 
-      # Check if ${npmScriptName} script is defined, skip if not
-      has_hook_script ${npmScriptName} || exit 0`
+        # Check if ${npmScriptName} script is defined, skip if not
+        has_hook_script ${npmScriptName} || exit 0
+      else
+        exit 0
+      fi
+      `
     ).trim(),
 
     platformSpecific(),
